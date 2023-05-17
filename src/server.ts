@@ -1,10 +1,11 @@
+import 'dotenv/config';
 import { Bot } from "grammy";
 import { Configuration, OpenAIApi } from "openai";
 
-const bot = new Bot(""); // <-- put your bot token here (https://t.me/BotFather)
+const bot = new Bot(process.env.TELEGRAM_BOT_TOKEN);
 
 const configuration = new Configuration({
-  apiKey: "",
+  apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
