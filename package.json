@@ -1,0 +1,24 @@
+{
+  "name": "vidpovid-bot",
+  "version": "0.1.0",
+  "description": "Telegram bot with AI",
+  "main": "index.js",
+  "scripts": {
+    "build-ts": "tsc",
+    "build": "npm run build-ts",
+    "serve": "node dist/server.js",
+    "start": "npm run serve",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ai",
+    "chatgpt",
+    "telegram"
+  ],
+  "author": "Eugen Efremov (jhekasoft)",
+  "license": "ISC",
+  "dependencies": {
+    "grammy": "^1.14.1",
+    "openai": "^3.2.1"
+  }
+}
