@@ -4,10 +4,10 @@
   "description": "Telegram bot with AI",
   "main": "index.js",
   "scripts": {
-    "build-ts": "tsc",
-    "build": "npm run build-ts",
+    "start": "npm run build && npm run serve",
     "serve": "node dist/server.js",
-    "start": "npm run serve",
+    "build": "npm run build-ts",
+    "build-ts": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

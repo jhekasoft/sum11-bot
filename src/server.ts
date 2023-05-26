@@ -1,9 +1,28 @@
 import 'dotenv/config';
-import { Bot } from "grammy";
+import { Bot, Context, SessionFlavor, session } from "grammy";
 import { Configuration, OpenAIApi } from "openai";
 
-const bot = new Bot(process.env.TELEGRAM_BOT_TOKEN);
+interface SessionData {
+  lastCommand: string;
+}
 
+type MyContext = Context & SessionFlavor<SessionData>;
+
+// TODO: make separated service
+function getSumLink(keyword: string) {
+  return `http://sum.in.ua/?swrd=${keyword}`;
+}
+
+// Init Telegram bot
+const bot = new Bot<MyContext>(process.env.TELEGRAM_BOT_TOKEN);
+
+// Install session middleware, and define the initial session value.
+function initial(): SessionData {
+  return { lastCommand: null };
+}
+bot.use(session({ initial }));
+
+// Init OpenAI
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -12,23 +31,36 @@ const openai = new OpenAIApi(configuration);
 bot.api.setMyCommands([
   // { command: "start", description: "Start the bot" },
   { command: "sum", description: "Посилання на СУМ-11" },
+  { command: "cancel", description: "Скинути останню команду і продовжити спілкуватися з ботом." },
 ]);
 
-bot.command("sum", (ctx) => {
+bot.command("sum", async (ctx) => {
   if (!ctx.match) {
-    return ctx.reply("Додайте українське слово")
+    ctx.session.lastCommand = "sum"
+    return await ctx.reply("Напишіть українське слово")
   }
-  ctx.reply(`http://sum.in.ua/?swrd=${ctx.match}`)
+  await ctx.reply(getSumLink(ctx.match))
+});
+
+bot.command("cancel", async (ctx) => {
+  ctx.session.lastCommand = null
 });
 
 // Reply to any message with OpenAI message
 bot.on("message:text", async (ctx) => {
+  switch (ctx.session.lastCommand) {
+    case "sum":
+      return await ctx.reply(getSumLink(ctx.msg.text))
+  }
+
+  // Without command
+  // TODO: add error checking
   const completion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [{role: "user", content: ctx.msg.text}],
   });
   const replyMessage = completion.data.choices[0].message.content;
-  ctx.reply(replyMessage)
+  await ctx.reply(replyMessage)
 });
 
 bot.start();
