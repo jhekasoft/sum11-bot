@@ -20,6 +20,7 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "grammy": "^1.14.1",
+    "node-html-parser": "^6.1.5",
     "openai": "^3.2.1"
   },
   "devDependencies": {

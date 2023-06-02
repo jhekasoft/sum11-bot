@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { Bot, Context, SessionFlavor, session } from "grammy";
 import { Configuration, OpenAIApi } from "openai";
+import { getArticle } from './ukrdict-parser';
 
 interface SessionData {
   lastCommand: string;
@@ -9,8 +10,9 @@ interface SessionData {
 type MyContext = Context & SessionFlavor<SessionData>;
 
 // TODO: make separated service
-function getSumLink(keyword: string) {
-  return `http://sum.in.ua/?swrd=${keyword}`;
+async function getSumLink(keyword: string) {
+  const articleText = await getArticle(keyword);
+  return `${articleText}\nhttp://sum.in.ua/?swrd=${keyword}`;
 }
 
 // Init Telegram bot
@@ -39,7 +41,7 @@ bot.command("sum", async (ctx) => {
     ctx.session.lastCommand = "sum"
     return await ctx.reply("Напишіть українське слово")
   }
-  await ctx.reply(getSumLink(ctx.match))
+  await ctx.reply(await getSumLink(ctx.match))
 });
 
 bot.command("cancel", async (ctx) => {
@@ -50,7 +52,7 @@ bot.command("cancel", async (ctx) => {
 bot.on("message:text", async (ctx) => {
   switch (ctx.session.lastCommand) {
     case "sum":
-      return await ctx.reply(getSumLink(ctx.msg.text))
+      return await ctx.reply(await getSumLink(ctx.msg.text))
   }
 
   // Without command
