@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import { Bot, Context, SessionFlavor, session } from "grammy";
+import { Bot, CommandContext, Context, InlineKeyboard, Keyboard, SessionFlavor, session } from "grammy";
 import { Configuration, OpenAIApi } from "openai";
-import { getArticle } from './ukrdict-parser';
+import { getExplanation } from './ukrdict-parser';
 
 interface SessionData {
   lastCommand: string;
@@ -10,9 +10,25 @@ interface SessionData {
 type MyContext = Context & SessionFlavor<SessionData>;
 
 // TODO: make separated service
-async function getSumLink(keyword: string) {
-  const articleText = await getArticle(keyword);
-  return `${articleText}\nhttp://sum.in.ua/?swrd=${keyword}`;
+async function makeSumResponse(keyword: string, ctx: Context) {
+  const articleText = await getExplanation(keyword);
+  if (articleText && Array.isArray(articleText)) {
+    const keyboard = new Keyboard()
+      .placeholder("Можливо, ви шукали:")
+      .oneTime()
+    for (const i in articleText) {
+      keyboard.text(articleText[i]).row()
+    }
+    await ctx.reply("Слово не знайдено. Але є варіанти.", {
+      reply_markup: keyboard
+    });
+  } else if (typeof articleText == "string") {
+    await ctx.reply(articleText);
+    await ctx.reply(`[Посилання](http://sum.in.ua/?swrd=${keyword})`, {
+      disable_web_page_preview: true,
+      parse_mode: "MarkdownV2"
+    });
+  }
 }
 
 // Init Telegram bot
@@ -32,7 +48,7 @@ const openai = new OpenAIApi(configuration);
 
 bot.api.setMyCommands([
   // { command: "start", description: "Start the bot" },
-  { command: "sum", description: "Посилання на СУМ-11" },
+  { command: "sum", description: "Тлумачення з СУМ-11" },
   { command: "cancel", description: "Скинути останню команду і продовжити спілкуватися з ботом." },
 ]);
 
@@ -41,7 +57,7 @@ bot.command("sum", async (ctx) => {
     ctx.session.lastCommand = "sum"
     return await ctx.reply("Напишіть українське слово")
   }
-  await ctx.reply(await getSumLink(ctx.match))
+  await makeSumResponse(ctx.match, ctx)
 });
 
 bot.command("cancel", async (ctx) => {
@@ -52,7 +68,7 @@ bot.command("cancel", async (ctx) => {
 bot.on("message:text", async (ctx) => {
   switch (ctx.session.lastCommand) {
     case "sum":
-      return await ctx.reply(await getSumLink(ctx.msg.text))
+      return await makeSumResponse(ctx.msg.text, ctx)
   }
 
   // Without command
