@@ -1,6 +1,5 @@
 import 'dotenv/config';
-import { Bot, CommandContext, Context, InlineKeyboard, Keyboard, SessionFlavor, session } from "grammy";
-import { Configuration, OpenAIApi } from "openai";
+import { Bot, Context, Keyboard, SessionFlavor, session } from "grammy";
 import { getExplanation } from './ukrdict-parser';
 
 interface SessionData {
@@ -40,24 +39,14 @@ function initial(): SessionData {
 }
 bot.use(session({ initial }));
 
-// Init OpenAI
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+// bot.api.setMyCommands([
+//   // { command: "start", description: "Start the bot" },
+//   { command: "sum", description: "Тлумачення з СУМ-11" },
+//   { command: "cancel", description: "Скинути останню команду і продовжити спілкуватися з ботом." },
+// ]);
 
-bot.api.setMyCommands([
-  // { command: "start", description: "Start the bot" },
-  { command: "sum", description: "Тлумачення з СУМ-11" },
-  { command: "cancel", description: "Скинути останню команду і продовжити спілкуватися з ботом." },
-]);
-
-bot.command("sum", async (ctx) => {
-  if (!ctx.match) {
-    ctx.session.lastCommand = "sum"
-    return await ctx.reply("Напишіть українське слово")
-  }
-  await makeSumResponse(ctx.match, ctx)
+bot.command("start", async (ctx) => {
+  ctx.reply("Напишіть українське слово.")
 });
 
 bot.command("cancel", async (ctx) => {
@@ -66,19 +55,7 @@ bot.command("cancel", async (ctx) => {
 
 // Reply to any message with OpenAI message
 bot.on("message:text", async (ctx) => {
-  switch (ctx.session.lastCommand) {
-    case "sum":
-      return await makeSumResponse(ctx.msg.text, ctx)
-  }
-
-  // Without command
-  // TODO: add error checking
-  const completion = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    messages: [{role: "user", content: ctx.msg.text}],
-  });
-  const replyMessage = completion.data.choices[0].message.content;
-  await ctx.reply(replyMessage)
+  return await makeSumResponse(ctx.msg.text, ctx)
 });
 
 bot.start();

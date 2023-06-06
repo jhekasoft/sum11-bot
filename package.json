@@ -1,7 +1,7 @@
 {
-  "name": "vidpovid-bot",
+  "name": "sum11-bot",
   "version": "0.1.0",
-  "description": "Telegram bot with AI",
+  "description": "Telegram bot with Ukrainian dictionary",
   "main": "index.js",
   "scripts": {
     "start": "npm run build && npm run serve",
@@ -11,17 +11,18 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "ai",
-    "chatgpt",
+    "sum11",
+    "ukrainian",
+    "sum.in.ua",
     "telegram"
   ],
   "author": "Eugen Efremov (jhekasoft)",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.4.0",
     "dotenv": "^16.0.3",
     "grammy": "^1.14.1",
-    "node-html-parser": "^6.1.5",
-    "openai": "^3.2.1"
+    "node-html-parser": "^6.1.5"
   },
   "devDependencies": {
     "@types/node": "^20.1.7"
