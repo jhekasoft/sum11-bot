@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.1.7",
-    "tsc": "^2.0.4"
+    "tsc": "^2.0.4",
+    "typescript": "^5.1.3"
   }
 }
