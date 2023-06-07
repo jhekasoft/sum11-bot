@@ -25,6 +25,7 @@
     "node-html-parser": "^6.1.5"
   },
   "devDependencies": {
-    "@types/node": "^20.1.7"
+    "@types/node": "^20.1.7",
+    "tsc": "^2.0.4"
   }
 }
