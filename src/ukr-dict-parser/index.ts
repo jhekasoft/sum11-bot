@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { parse } from 'node-html-parser';
 
-export async function getExplanation(keyword: string): Promise<string | string[]> {
+export async function getExplanation(keyword: string): Promise<Article> {
   const result = await axios
   .get(encodeURI(`http://sum.in.ua/?swrd=${keyword}`))
   .then((response) => {
@@ -13,14 +13,21 @@ export async function getExplanation(keyword: string): Promise<string | string[]
     // Parse article
     const articleEl = root.querySelector('[itemprop=articleBody]')
     if (articleEl) {
-      return articleEl.structuredText
+      const titleEl = articleEl.querySelector('[itemprop=headline]')
+
+      return {
+        title: titleEl.innerText,
+        text: articleEl.structuredText
+      }
     }
 
     // Parse alternatives
     const alternativesEL = root.querySelector('#search-res ul')
     if (alternativesEL && alternativesEL.childNodes.length > 0) {
       const alternatives = alternativesEL.childNodes.map(n => n.text)
-      return alternatives
+      return {
+        alternatives
+      }
     }
 
     return null
