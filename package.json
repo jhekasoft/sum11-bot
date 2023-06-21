@@ -16,13 +16,12 @@
     "sum.in.ua",
     "telegram"
   ],
-  "author": "Eugen Efremov (jhekasoft)",
+  "author": "Eugene Efremov (jhekasoft)",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.4.0",
     "dotenv": "^16.0.3",
     "grammy": "^1.14.1",
-    "node-html-parser": "^6.1.5",
+    "sum11": "^0.1.11",
     "typescript": "^5.1.3"
   },
   "devDependencies": {

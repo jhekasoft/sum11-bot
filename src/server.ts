@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { Bot, Context, InlineKeyboard, Keyboard, SessionFlavor, session } from "grammy";
-import { getExplanation } from './ukr-dict-parser';
+import { getExplanation } from 'sum11';
 
 interface SessionData {
   lastCommand: string;
