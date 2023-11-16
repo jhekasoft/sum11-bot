@@ -1,0 +1,17 @@
+[Unit]
+Description=SUM11 bot
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+WorkingDirectory=/opt/sum11-bot
+ExecStart=/usr/bin/node /opt/sum11-bot/dist/server.js
+
+[Install]
+WantedBy=multi-user.target
