@@ -1,12 +1,12 @@
-import 'dotenv/config';
-import { Bot, Context, InlineKeyboard, Keyboard, SessionFlavor, session } from "grammy";
-import { getExplanation } from 'sum11';
+import 'dotenv/config'
+import { Bot, Context, InlineKeyboard, Keyboard, SessionFlavor, session } from "grammy"
+import { getExplanation } from 'sum11'
 
 interface SessionData {
-  lastCommand: string;
+  lastCommand: string
 }
 
-type MyContext = Context & SessionFlavor<SessionData>;
+type MyContext = Context & SessionFlavor<SessionData>
 
 // TODO: make separated service
 async function makeSumResponse(keyword: string, ctx: Context) {
@@ -25,7 +25,7 @@ async function makeSumResponse(keyword: string, ctx: Context) {
     if (article.title) {
       await ctx.reply(`*${article.title}*`, {
         parse_mode: "Markdown"
-      });
+      })
     }
 
     let text = article.text
@@ -49,7 +49,7 @@ async function makeSumResponse(keyword: string, ctx: Context) {
     await ctx.reply(text, {
       // parse_mode: "Markdown",
       reply_markup: keyboard
-    });
+    })
     // await ctx.reply(`[Посилання](http://sum.in.ua/?swrd=${keyword})`, {
     //   disable_web_page_preview: true,
     //   parse_mode: "MarkdownV2"
@@ -58,13 +58,13 @@ async function makeSumResponse(keyword: string, ctx: Context) {
 }
 
 // Init Telegram bot
-const bot = new Bot<MyContext>(process.env.TELEGRAM_BOT_TOKEN);
+const bot = new Bot<MyContext>(process.env.TELEGRAM_BOT_TOKEN)
 
 // Install session middleware, and define the initial session value.
 function initial(): SessionData {
-  return { lastCommand: null };
+  return { lastCommand: null }
 }
-bot.use(session({ initial }));
+bot.use(session({ initial }))
 
 // bot.api.setMyCommands([
 //   // { command: "start", description: "Start the bot" },
@@ -74,15 +74,25 @@ bot.use(session({ initial }));
 
 bot.command("start", async (ctx) => {
   ctx.reply("Напишіть українське слово.")
-});
+})
 
 bot.command("cancel", async (ctx) => {
   ctx.session.lastCommand = null
-});
+})
 
 // Reply to any message with OpenAI message
 bot.on("message:text", async (ctx) => {
-  return await makeSumResponse(ctx.msg.text, ctx)
-});
+  if (!ctx.msg) {
+    console.warn("Empty message")
+    return
+  }
 
-bot.start();
+  // Log
+  const fromStr = JSON.stringify(ctx.msg.from)
+  const logMsg = `Request\n----------------\nFrom:${fromStr}\nText: ${ctx.msg.text}`
+  console.log(logMsg)
+
+  return await makeSumResponse(ctx.msg.text, ctx)
+})
+
+bot.start()
