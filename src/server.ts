@@ -45,7 +45,7 @@ async function makeSumResponse(keyword: string, ctx: Context) {
     //   "скраклі... (Костянтин Гордієнко, Дівчина.., 1954, 301)_.\n"
     // text = "СКРА́КЛІ";
     const keyboard = new InlineKeyboard()
-      .url("Посилання", `http://sum.in.ua/?swrd=${keyword}`)
+      .url("Посилання", article.url)
     await ctx.reply(text, {
       // parse_mode: "Markdown",
       reply_markup: keyboard
