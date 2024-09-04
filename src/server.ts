@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { Bot, Context, InlineKeyboard, Keyboard, SessionFlavor, session } from "grammy"
+import { Bot, Context, Keyboard, SessionFlavor, session } from "grammy"
 import { getExplanation } from 'sum11'
 
 interface SessionData {
@@ -44,8 +44,8 @@ async function makeSumResponse(keyword: string, ctx: Context) {
     //   "і дав відповідь професорові: — Оце, — каже, — " +
     //   "скраклі... (Костянтин Гордієнко, Дівчина.., 1954, 301)_.\n"
     // text = "СКРА́КЛІ";
-    const keyboard = new InlineKeyboard()
-      .url("Посилання", article.url)
+    // const keyboard = new InlineKeyboard()
+    //   .url("Посилання", article.url)
     const markdownReplace = /[_*[\]()~`>#\+\-=|{}.!]/g
     // TODO: fix > 4096 length
     // Expandable quote
@@ -53,8 +53,8 @@ async function makeSumResponse(keyword: string, ctx: Context) {
       text.replace(markdownReplace, '\\$&').replace(/\n/g,'\n>') +
       '||'
     await ctx.reply(formattedText, {
-      parse_mode: "MarkdownV2"
-      // reply_markup: keyboard
+      parse_mode: "MarkdownV2",
+      reply_markup: { remove_keyboard: true }
     })
     // await ctx.reply(`[Посилання](http://sum.in.ua/?swrd=${keyword})`, {
     //   disable_web_page_preview: true,
