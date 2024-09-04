@@ -46,9 +46,15 @@ async function makeSumResponse(keyword: string, ctx: Context) {
     // text = "СКРА́КЛІ";
     const keyboard = new InlineKeyboard()
       .url("Посилання", article.url)
-    await ctx.reply(text, {
-      // parse_mode: "Markdown",
-      reply_markup: keyboard
+    const markdownReplace = /[_*[\]()~`>#\+\-=|{}.!]/g
+    // TODO: fix > 4096 length
+    // Expandable quote
+    const formattedText = '**>' +
+      text.replace(markdownReplace, '\\$&').replace(/\n/g,'\n>') +
+      '||'
+    await ctx.reply(formattedText, {
+      parse_mode: "MarkdownV2"
+      // reply_markup: keyboard
     })
     // await ctx.reply(`[Посилання](http://sum.in.ua/?swrd=${keyword})`, {
     //   disable_web_page_preview: true,
