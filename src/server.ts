@@ -10,44 +10,53 @@ type MyContext = Context & SessionFlavor<SessionData>
 
 // TODO: make separated service
 async function makeSumResponse(keyword: string, ctx: Context) {
+  // Set dictionary service
   setConfig({
     type: process.env.SUM_TYPE as ServiceType,
     baseUrl: process.env.SUM_BASE_URL || null
   })
-  const article = await getExplanation(keyword);
-  if (article && article.alternatives) {
-    const keyboard = new Keyboard()
-      .placeholder("Можливо, ви шукали:")
-      .oneTime()
-    for (const i in article.alternatives) {
-      keyboard.text(article.alternatives[i]).row()
-    }
-    await ctx.reply("Слово не знайдено. Але є варіанти.", {
-      reply_markup: keyboard
-    });
-  } else if (article.text) {
-    if (article.title) {
-      await ctx.reply(`*${article.title}*`, {
-        parse_mode: "Markdown"
-      })
-    }
 
-    let text = article.text
-    if (article.text.length > 4096) {
-      text = article.text.substring(0, 4096)
-    }
+  // Get word explanation and answer
+  getExplanation(keyword)
+    .then(article => {
+      if (article && article.alternatives) { // Answer with alternatives
+        const keyboard = new Keyboard()
+          .placeholder("Можливо, ви шукали:")
+          .oneTime()
+        for (const i in article.alternatives) {
+          keyboard.text(article.alternatives[i]).row()
+        }
+        ctx.reply("Слово не знайдено. Але є варіанти.", {
+          reply_markup: keyboard
+        })
+      } else if (article.text) { // Answer with explanation
+        if (article.title) {
+          ctx.reply(`*${article.title}*`, {
+            parse_mode: "Markdown"
+          })
+        }
 
-    const markdownReplace = /[_*[\]()~`>#\+\-=|{}.!]/g
-    // TODO: fix > 4096 length
-    // Expandable quote
-    const formattedText = '**>' +
-      text.replace(markdownReplace, '\\$&').replace(/\n/g,'\n>') +
-      '||'
-    await ctx.reply(formattedText, {
-      parse_mode: "MarkdownV2",
-      reply_markup: { remove_keyboard: true }
+        let text = article.text
+        if (article.text.length > 4096) {
+          text = article.text.substring(0, 4096)
+        }
+
+        const markdownReplace = /[_*[\]()~`>#\+\-=|{}.!]/g
+        // TODO: fix > 4096 length
+        // Expandable quote
+        const formattedText = '**>' +
+          text.replace(markdownReplace, '\\$&').replace(/\n/g,'\n>') +
+          '||'
+        ctx.reply(formattedText, {
+          parse_mode: "MarkdownV2",
+          reply_markup: { remove_keyboard: true }
+        })
+      }
     })
-  }
+    .catch((error) => {
+      console.log(`Error: ${error}`)
+      ctx.reply("Слово не знайдено. Вибачте. 😿")
+    })
 }
 
 // Init Telegram bot
