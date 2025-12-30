@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { Bot, Context, Keyboard, SessionFlavor, session } from "grammy"
-import { getExplanation } from 'sum11'
+import { getExplanation, setConfig, Config, ServiceType } from 'sum11'
 
 interface SessionData {
   lastCommand: string
@@ -10,6 +10,10 @@ type MyContext = Context & SessionFlavor<SessionData>
 
 // TODO: make separated service
 async function makeSumResponse(keyword: string, ctx: Context) {
+  setConfig({
+    type: process.env.SUM_TYPE as ServiceType,
+    baseUrl: process.env.SUM_BASE_URL || null
+  })
   const article = await getExplanation(keyword);
   if (article && article.alternatives) {
     const keyboard = new Keyboard()
@@ -32,20 +36,7 @@ async function makeSumResponse(keyword: string, ctx: Context) {
     if (article.text.length > 4096) {
       text = article.text.substring(0, 4096)
     }
-    // const textTmp = "*СКРА́КЛІ* (скрАклі), ів, _мн._\n\n" +
-    //   "1. Українська народна спортивна " +
-    //   "гра, яка полягає в тому, що гравці вибивають палкою з " +
-    //   "відведеного місця невеликі циліндричні цурпалки. _На одному з малюнків Суворова зображено під час гри " +
-    //   "в скраклі з селянськими дітьми (Життя і творчість Т. Г. Шевченка, 1959, 40); Хлопчики, що полюбляють влучність, " +
-    //   "грають у скраклі (Петро Панч, В дорозі, 1959, 270); Дуже " +
-    //   "корисні легке веслування, гра у скраклі, крокет, теніс, " +
-    //   "бадмінтон (Робітнича газета, 7.IV 1973, 4)_.\n\n" +
-    //   "2. _заст._ Кріплення у дерев'яному плузі, в яке встромляють дишло. _Як дійшла екскурсія до дерев'яних плугів — тут учені туди-сюди — розгубилися.. Пастух " +
-    //   "і дав відповідь професорові: — Оце, — каже, — " +
-    //   "скраклі... (Костянтин Гордієнко, Дівчина.., 1954, 301)_.\n"
-    // text = "СКРА́КЛІ";
-    // const keyboard = new InlineKeyboard()
-    //   .url("Посилання", article.url)
+
     const markdownReplace = /[_*[\]()~`>#\+\-=|{}.!]/g
     // TODO: fix > 4096 length
     // Expandable quote
@@ -56,10 +47,6 @@ async function makeSumResponse(keyword: string, ctx: Context) {
       parse_mode: "MarkdownV2",
       reply_markup: { remove_keyboard: true }
     })
-    // await ctx.reply(`[Посилання](http://sum.in.ua/?swrd=${keyword})`, {
-    //   disable_web_page_preview: true,
-    //   parse_mode: "MarkdownV2"
-    // });
   }
 }
 
@@ -72,12 +59,6 @@ function initial(): SessionData {
 }
 bot.use(session({ initial }))
 
-// bot.api.setMyCommands([
-//   // { command: "start", description: "Start the bot" },
-//   { command: "sum", description: "Тлумачення з СУМ-11" },
-//   { command: "cancel", description: "Скинути останню команду і продовжити спілкуватися з ботом." },
-// ]);
-
 bot.command("start", async (ctx) => {
   ctx.reply("Напишіть українське слово.")
 })
@@ -86,7 +67,7 @@ bot.command("cancel", async (ctx) => {
   ctx.session.lastCommand = null
 })
 
-// Reply to any message with OpenAI message
+// Reply to any message from bot
 bot.on("message:text", async (ctx) => {
   if (!ctx.msg) {
     console.warn("Empty message")
