@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { Bot, Context, Keyboard, SessionFlavor, session } from "grammy"
-import { getExplanation, setConfig, Config, ServiceType } from 'sum11'
+import { getExplanation, setConfig, ServiceType } from 'sum11'
 
 interface SessionData {
   lastCommand: string
@@ -18,7 +18,7 @@ async function makeSumResponse(keyword: string, ctx: Context) {
 
   // Get word explanation and answer
   getExplanation(keyword)
-    .then(article => {
+    .then(async article => {
       if (article && article.alternatives) { // Answer with alternatives
         const keyboard = new Keyboard()
           .placeholder("Можливо, ви шукали:")
@@ -31,7 +31,7 @@ async function makeSumResponse(keyword: string, ctx: Context) {
         })
       } else if (article.text) { // Answer with explanation
         if (article.title) {
-          ctx.reply(`*${article.title}*`, {
+          await ctx.reply(`*${article.title}*`, {
             parse_mode: "Markdown"
           })
         }
