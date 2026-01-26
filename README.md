@@ -39,3 +39,21 @@ Show log:
 ```bash
 journalctl -xeu sum11-bot.service
 ```
+
+# Run with docker
+
+Build image:
+
+```bash
+docker build -t sum11-bot .
+```
+
+Run:
+
+```bash
+docker run --name sum11-bot --rm --network host \
+-e "TELEGRAM_BOT_TOKEN=<TELEGRAM_BOT_TOKEN>" \
+-e "SUM_TYPE=sum_jhekasoft" \
+-e "SUM_BASE_URL=http://localhost:1988/" \
+sum11-bot
+```
